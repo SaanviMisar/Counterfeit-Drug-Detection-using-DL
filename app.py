@@ -1530,7 +1530,7 @@ Do not use this report as the sole basis for medical decisions.
             <p>Enhanced ResNet-50 Packaging Analysis + Advanced Pill Authenticity Classifier + Smart OCR Text Extraction</p>
             <p>For educational and screening purposes only</p>
         </div>
-        """
+        """,
         unsafe_allow_html=True
     )
 
@@ -1552,3 +1552,4 @@ if __name__ == "__main__":
         st.session_state.tablet_result = None
     
     main()
+
