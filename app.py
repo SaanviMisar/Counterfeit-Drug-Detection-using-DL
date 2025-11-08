@@ -1,4 +1,14 @@
 import streamlit as st
+
+# Set page config must be the very first Streamlit command
+st.set_page_config(
+    page_title="Drug Authenticity Detector",
+    page_icon="💊",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Now import other libraries
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -15,23 +25,19 @@ import pickle
 import os
 import joblib
 from scipy import ndimage
-from huggingface_hub import hf_hub_download  # ADD THIS IMPORT
 
-# Try to import TensorFlow, but provide fallback if not available
+# Import Hugging Face Hub with error handling
 try:
-    import tensorflow as tf
-    from tensorflow.keras.models import load_model
-    TENSORFLOW_AVAILABLE = True
+    from huggingface_hub import hf_hub_download
+    HUGGINGFACE_AVAILABLE = True
 except ImportError:
-    st.warning("TensorFlow is not installed. Please install it with: pip install tensorflow")
-    TENSORFLOW_AVAILABLE = False
+    HUGGINGFACE_AVAILABLE = False
 
 # Try to import scikit-learn, but provide fallback if not available
 try:
     from sklearn.preprocessing import StandardScaler
     SKLEARN_AVAILABLE = True
 except ImportError:
-    st.warning("scikit-learn is not installed. Please install it with: pip install scikit-learn")
     SKLEARN_AVAILABLE = False
 
 # ============================================================================
@@ -245,21 +251,25 @@ class SimplePillFeatureExtractor:
             return 0.5
 
 # ============================================================================
-# MODEL LOADING FUNCTIONS - MODIFIED TO LOAD FROM HUGGING FACE
+# MODEL LOADING FUNCTIONS - CORRECTED HUGGING FACE USERNAMES
 # ============================================================================
 
 @st.cache_resource
 def load_packaging_model():
     """Load the packaging analysis model from Hugging Face"""
+    if not HUGGINGFACE_AVAILABLE:
+        st.error("Hugging Face Hub not available. Using fallback analysis.")
+        return None, None
+        
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     model = EnhancedResNet50(num_classes=2, pretrained=False)
     
     try:
-        # Download model from Hugging Face
+        # Download model from Hugging Face - CORRECTED USERNAME
         model_path = hf_hub_download(
-            repo_id="saanvimisar10/Packaging-Analysis",  # Your packaging model repo
-            filename="best_enhanced_resnet_model.pth",   # Your model filename
+            repo_id="saanvimisar10/Packaging-Analysis",  # CORRECTED: saanvimisar10
+            filename="best_enhanced_resnet_model.pth",
             cache_dir="./models"
         )
         
@@ -267,6 +277,7 @@ def load_packaging_model():
         model.load_state_dict(checkpoint['model_state_dict'])
         model.to(device)
         model.eval()
+        st.success("✅ Packaging model loaded successfully from Hugging Face")
         return model, device
     except Exception as e:
         st.error(f"Error loading packaging model from Hugging Face: {e}")
@@ -318,11 +329,15 @@ def create_fallback_classifier():
 @st.cache_resource
 def load_tablet_model():
     """Load the physical tablet analysis model from Hugging Face"""
+    if not HUGGINGFACE_AVAILABLE:
+        st.error("Hugging Face Hub not available. Using fallback analysis.")
+        return create_fallback_classifier()
+        
     try:
-        # Download model from Hugging Face
+        # Download model from Hugging Face - CORRECTED USERNAME
         model_path = hf_hub_download(
-            repo_id="saanvimisar10/Tablet-Analysis",     # Your tablet model repo
-            filename="pill_authenticity_classifier.pkl", # Your model filename
+            repo_id="saanvimisar10/Tablet-Analysis",     # CORRECTED: saanvimisar10
+            filename="pill_authenticity_classifier.pkl",
             cache_dir="./models"
         )
         
@@ -386,6 +401,7 @@ def load_tablet_model():
                 st.warning(f"Joblib load failed: {e}")
         
         # If all methods fail, use fallback without showing the warning
+        st.info("Using fallback tablet analysis...")
         return create_fallback_classifier()
         
     except Exception as e:
@@ -807,14 +823,6 @@ def process_extracted_text(text, raw_data):
 # ============================================================================
 
 def main():
-    # Page configuration
-    st.set_page_config(
-        page_title="Drug Authenticity Detector",
-        page_icon="💊",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
-    
     # Custom CSS
     st.markdown("""
         <style>
