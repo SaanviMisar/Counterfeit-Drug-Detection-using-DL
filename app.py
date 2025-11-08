@@ -295,7 +295,6 @@ def load_packaging_model():
         model.load_state_dict(checkpoint['model_state_dict'])
         model.to(device)
         model.eval()
-        st.success("✅ Packaging model loaded successfully from Hugging Face")
         return model, device
     except Exception as e:
         st.error(f"Error loading packaging model from Hugging Face: {e}")
@@ -424,7 +423,6 @@ def load_tablet_model():
         
     except Exception as e:
         st.error(f"Critical error loading tablet model from Hugging Face: {e}")
-        st.info("Using fallback tablet analysis...")
         return create_fallback_classifier()
 
 # ============================================================================
@@ -1221,8 +1219,7 @@ def main():
                             st.info("**Full Text:** " + ocr_result['text'])
                             
                 else:
-                    st.error(f"❌ Text extraction failed: {ocr_result['error']}")
-                    st.info("Proceeding with visual analysis only...")
+                    st.error(f"❌ Text extraction failed: {ocr_result['error']} image is blur")
                 
                 st.markdown('</div>', unsafe_allow_html=True)
             
@@ -1552,4 +1549,5 @@ if __name__ == "__main__":
         st.session_state.tablet_result = None
     
     main()
+
 
