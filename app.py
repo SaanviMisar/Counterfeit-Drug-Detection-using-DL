@@ -26,6 +26,14 @@ import os
 import joblib
 from scipy import ndimage
 
+# Import PDF generation libraries
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+import io
+
 # Import Hugging Face Hub with error handling
 try:
     from huggingface_hub import hf_hub_download
@@ -1414,94 +1422,131 @@ def main():
                         """
                     )
         
-        # Download Report
+        # Download Report - PDF VERSION
         st.markdown("---")
         
-        report_text = f"""
-═══════════════════════════════════════════════════════════
-    COMPREHENSIVE DRUG AUTHENTICITY ANALYSIS REPORT
-═══════════════════════════════════════════════════════════
-
-Analysis Timestamp: {st.session_state.get('analysis_timestamp', 'N/A')}
-
-───────────────────────────────────────────────────────────
-PACKAGING TEXT ANALYSIS
-───────────────────────────────────────────────────────────
-"""
+        # Create PDF content
+        pdf_buffer = io.BytesIO()
+        
+        # Create the PDF document
+        doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+        styles = getSampleStyleSheet()
+        
+        # Custom styles
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            spaceAfter=30,
+            alignment=1,  # Center aligned
+            textColor=colors.darkblue
+        )
+        
+        heading_style = ParagraphStyle(
+            'CustomHeading',
+            parent=styles['Heading2'],
+            fontSize=12,
+            spaceAfter=12,
+            spaceBefore=12,
+            textColor=colors.darkblue
+        )
+        
+        normal_style = styles['Normal']
+        
+        # Build PDF content
+        content = []
+        
+        # Title
+        content.append(Paragraph("COMPREHENSIVE DRUG AUTHENTICITY ANALYSIS REPORT", title_style))
+        content.append(Spacer(1, 0.2*inch))
+        
+        # Analysis Timestamp
+        content.append(Paragraph(f"<b>Analysis Timestamp:</b> {st.session_state.get('analysis_timestamp', 'N/A')}", normal_style))
+        content.append(Spacer(1, 0.3*inch))
+        
+        # Packaging Text Analysis
+        content.append(Paragraph("PACKAGING TEXT ANALYSIS", heading_style))
         if structured_text:
             for category, value in structured_text:
-                report_text += f"{category}: {value}\n"
+                content.append(Paragraph(f"<b>{category}:</b> {value}", normal_style))
         elif ocr_result and ocr_result['success']:
-            report_text += f"Extracted Text: {ocr_result['text']}\n"
+            content.append(Paragraph(f"<b>Extracted Text:</b> {ocr_result['text']}", normal_style))
         else:
-            report_text += "Status: Text extraction not available\n"
+            content.append(Paragraph("Status: Text extraction not available", normal_style))
         
-        report_text += """
-───────────────────────────────────────────────────────────
-PACKAGING VISUAL ANALYSIS
-───────────────────────────────────────────────────────────
-"""
+        content.append(Spacer(1, 0.2*inch))
+        
+        # Packaging Visual Analysis
+        content.append(Paragraph("PACKAGING VISUAL ANALYSIS", heading_style))
         if packaging_result:
-            report_text += f"""
-Classification: {packaging_result['class']}
-Confidence: {packaging_result['confidence']:.2f}%
-Genuine Probability: {packaging_result['probabilities']['Genuine']}
-Counterfeit Probability: {packaging_result['probabilities']['Counterfeit']}
-
-PACKAGING ASSESSMENT: {"GENUINE" if packaging_result['class'] == 'Genuine' else "COUNTERFEIT"}
-"""
+            content.append(Paragraph(f"<b>Classification:</b> {packaging_result['class']}", normal_style))
+            content.append(Paragraph(f"<b>Confidence:</b> {packaging_result['confidence']:.2f}%", normal_style))
+            content.append(Paragraph(f"<b>Genuine Probability:</b> {packaging_result['probabilities']['Genuine']}", normal_style))
+            content.append(Paragraph(f"<b>Counterfeit Probability:</b> {packaging_result['probabilities']['Counterfeit']}", normal_style))
+            content.append(Spacer(1, 0.1*inch))
+            assessment = "GENUINE" if packaging_result['class'] == 'Genuine' else "COUNTERFEIT"
+            content.append(Paragraph(f"<b>PACKAGING ASSESSMENT: {assessment}</b>", normal_style))
         else:
-            report_text += "Status: Not Analyzed\n"
+            content.append(Paragraph("Status: Not Analyzed", normal_style))
         
-        report_text += """
-───────────────────────────────────────────────────────────
-PHYSICAL TABLET ANALYSIS
-───────────────────────────────────────────────────────────
-"""
+        content.append(Spacer(1, 0.2*inch))
+        
+        # Physical Tablet Analysis
+        content.append(Paragraph("PHYSICAL TABLET ANALYSIS", heading_style))
         if tablet_result:
-            report_text += f"""
-Classification: {tablet_result['class']}
-Confidence: {tablet_result['confidence']:.2f}%
-Genuine Probability: {tablet_result['probabilities']['Genuine']}
-Counterfeit Probability: {tablet_result['probabilities']['Counterfeit']}
-
-TABLET ASSESSMENT: {"GENUINE" if tablet_result['class'] == 'Genuine' else "COUNTERFEIT"}
-"""
+            content.append(Paragraph(f"<b>Classification:</b> {tablet_result['class']}", normal_style))
+            content.append(Paragraph(f"<b>Confidence:</b> {tablet_result['confidence']:.2f}%", normal_style))
+            content.append(Paragraph(f"<b>Genuine Probability:</b> {tablet_result['probabilities']['Genuine']}", normal_style))
+            content.append(Paragraph(f"<b>Counterfeit Probability:</b> {tablet_result['probabilities']['Counterfeit']}", normal_style))
             
             if 'feature_analysis' in tablet_result:
-                report_text += "Feature Analysis:\n"
+                content.append(Spacer(1, 0.1*inch))
+                content.append(Paragraph("<b>Feature Analysis:</b>", normal_style))
                 fa = tablet_result['feature_analysis']
-                report_text += f"  Symmetry: {fa.get('symmetry', 0):.3f}\n"
-                report_text += f"  Edge Density: {fa.get('edge_density', 0):.3f}\n"
-                report_text += f"  Brightness: {fa.get('brightness', 0):.3f}\n"
-                report_text += f"  Contrast: {fa.get('contrast', 0):.3f}\n"
-                report_text += f"  Roughness: {fa.get('roughness', 0):.3f}\n"
+                content.append(Paragraph(f"  Symmetry: {fa.get('symmetry', 0):.3f}", normal_style))
+                content.append(Paragraph(f"  Edge Density: {fa.get('edge_density', 0):.3f}", normal_style))
+                content.append(Paragraph(f"  Brightness: {fa.get('brightness', 0):.3f}", normal_style))
+                content.append(Paragraph(f"  Contrast: {fa.get('contrast', 0):.3f}", normal_style))
+                content.append(Paragraph(f"  Roughness: {fa.get('roughness', 0):.3f}", normal_style))
             
             if 'note' in tablet_result:
-                report_text += f"Note: {tablet_result['note']}\n"
+                content.append(Paragraph(f"<b>Note:</b> {tablet_result['note']}", normal_style))
+            
+            content.append(Spacer(1, 0.1*inch))
+            assessment = "GENUINE" if tablet_result['class'] == 'Genuine' else "COUNTERFEIT"
+            content.append(Paragraph(f"<b>TABLET ASSESSMENT: {assessment}</b>", normal_style))
         else:
-            report_text += "Status: Not Analyzed\n"
+            content.append(Paragraph("Status: Not Analyzed", normal_style))
         
-        report_text += """
-───────────────────────────────────────────────────────────
-DISCLAIMER
-───────────────────────────────────────────────────────────
-This analysis is provided by AI models for screening purposes only.
-Always consult pharmaceutical experts for final verification.
-Do not use this report as the sole basis for medical decisions.
-
-═══════════════════════════════════════════════════════════
-    Generated by Comprehensive Drug Authenticity Detector
-═══════════════════════════════════════════════════════════
-"""
+        content.append(Spacer(1, 0.3*inch))
+        
+        # Disclaimer
+        content.append(Paragraph("DISCLAIMER", heading_style))
+        disclaimer_text = """
+        This analysis is provided by AI models for screening purposes only. 
+        Always consult pharmaceutical experts for final verification. 
+        Do not use this report as the sole basis for medical decisions.
+        """
+        content.append(Paragraph(disclaimer_text, normal_style))
+        
+        content.append(Spacer(1, 0.3*inch))
+        content.append(Paragraph("Generated by Comprehensive Drug Authenticity Detector", 
+                               ParagraphStyle('Footer', parent=normal_style, alignment=1, textColor=colors.gray)))
+        
+        # Build PDF
+        doc.build(content)
+        
+        # Get PDF data
+        pdf_data = pdf_buffer.getvalue()
+        pdf_buffer.close()
         
         col_download = st.columns([1, 1, 1])
         with col_download[1]:
             st.download_button(
-                label="📥 Download Complete Analysis Report",
-                data=report_text,
-                file_name=f"drug_analysis_report_{st.session_state.get('analysis_timestamp', 'report').replace(':', '-').replace(' ', '_')}.txt",
-                mime="text/plain"
+                label="📥 Download Complete Analysis Report (PDF)",
+                data=pdf_data,
+                file_name=f"drug_analysis_report_{st.session_state.get('analysis_timestamp', 'report').replace(':', '-').replace(' ', '_')}.pdf",
+                mime="application/pdf"
             )
     
     # Disclaimer
@@ -1549,5 +1594,3 @@ if __name__ == "__main__":
         st.session_state.tablet_result = None
     
     main()
-
-
