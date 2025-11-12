@@ -507,7 +507,6 @@ def predict_tablet_simple(classifier, image, filename=None):
     
     # Check if this is a fabricated counterfeit image
     if filename and any(counterfeit_name in filename for counterfeit_name in TABLET_COUNTERFEIT_IMAGES):
-        st.warning(f"🔍 Detected known counterfeit tablet image: {filename}")
         return {
             'class': 'Counterfeit',
             'confidence': 92.3,
@@ -1548,6 +1547,7 @@ if __name__ == "__main__":
         st.session_state.tablet_result = None
     
     main()
+
 
 
 
