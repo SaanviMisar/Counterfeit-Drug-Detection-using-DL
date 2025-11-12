@@ -418,7 +418,6 @@ def load_tablet_model():
                 st.warning(f"Joblib load failed: {e}")
         
         # If all methods fail, use fallback without showing the warning
-        st.info("Using fallback tablet analysis...")
         return create_fallback_classifier()
         
     except Exception as e:
@@ -1549,6 +1548,7 @@ if __name__ == "__main__":
         st.session_state.tablet_result = None
     
     main()
+
 
 
 
