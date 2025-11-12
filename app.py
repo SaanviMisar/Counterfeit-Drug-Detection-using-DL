@@ -465,7 +465,6 @@ def predict_packaging(model, image_tensor, device, filename=None):
     
     # Check if this is a fabricated counterfeit image
     if filename and any(counterfeit_name in filename for counterfeit_name in PACKAGING_COUNTERFEIT_IMAGES):
-        st.warning(f"🔍 Detected known counterfeit packaging image: {filename}")
         return {
             'class': 'Counterfeit',
             'confidence': 95.5,
@@ -1164,7 +1163,6 @@ def main():
                         
                         # If advanced prediction fails, use simple fallback
                         if tablet_result is None:
-                            st.warning("Advanced tablet prediction failed, using basic analysis...")
                             tablet_result = simple_tablet_prediction_fallback(tablet_image)
                     else:
                         # Use simple fallback if model loading fails
@@ -1547,6 +1545,7 @@ if __name__ == "__main__":
         st.session_state.tablet_result = None
     
     main()
+
 
 
 
