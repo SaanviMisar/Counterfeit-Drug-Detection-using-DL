@@ -1009,7 +1009,7 @@ def main():
     """, unsafe_allow_html=True)
     
     # Header
-    st.markdown('<p class="main-header">💊Drug Authenticity Detector</p>', unsafe_allow_html=True)
+    st.markdown('<p class="main-header">💊MedCheck - AI</p>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Dual AI-Powered Analysis: Packaging + Physical Tablet Detection</p>', unsafe_allow_html=True)
     
     # Sidebar
@@ -1545,6 +1545,7 @@ if __name__ == "__main__":
         st.session_state.tablet_result = None
     
     main()
+
 
 
 
