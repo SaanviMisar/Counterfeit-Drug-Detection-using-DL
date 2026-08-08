@@ -172,3 +172,597 @@ Input Packaging Image
 │                      │
 │ Genuine / Counterfeit│
 └──────────────────────┘
+````
+
+---
+
+# 💊 Physical Tablet Feature Extraction
+
+The tablet analysis pipeline resizes images to:
+
+```text
+224 × 224 pixels
+```
+
+The image is processed and converted into a feature representation.
+
+## Texture Features
+
+The system extracts:
+
+* Mean
+* Standard deviation
+* Variance
+* Median
+* Minimum
+* Maximum
+* 25th percentile
+* 75th percentile
+
+## Structural Features
+
+* Edge density
+* Symmetry score
+
+## Image Characteristics
+
+* Contrast
+* Brightness
+
+## Gradient Features
+
+* Mean gradient magnitude
+* Standard deviation of gradient magnitude
+* Variance of gradient magnitude
+
+## Frequency-Domain Features
+
+A 2D Fourier transform is also used to obtain:
+
+* Mean magnitude spectrum
+* Standard deviation of magnitude spectrum
+* 75th percentile of magnitude spectrum
+
+These features are combined into a feature representation for the tablet authenticity analysis.
+
+---
+
+# 🔍 Symmetry Analysis
+
+The application calculates tablet symmetry by comparing corresponding sections of the image.
+
+Both horizontal and vertical symmetry are considered.
+
+```text
+                 Tablet Image
+                      │
+            ┌─────────┴─────────┐
+            │                   │
+            ▼                   ▼
+     Horizontal Analysis   Vertical Analysis
+            │                   │
+            ▼                   ▼
+       Left vs Right        Top vs Bottom
+            │                   │
+            └─────────┬─────────┘
+                      │
+                      ▼
+                Symmetry Score
+```
+
+The symmetry score is included in the tablet feature analysis.
+
+---
+
+# 🔄 Tablet Authenticity Classification
+
+The physical tablet model is loaded from Hugging Face.
+
+```text
+Hugging Face
+     │
+     ▼
+Tablet Authenticity Model
+     │
+     ▼
+Feature Extraction
+     │
+     ▼
+Authenticity / Anomaly Analysis
+     │
+     ▼
+Genuine / Counterfeit
+```
+
+The application includes compatibility handling for loading the serialized classifier using both `pickle` and `joblib`.
+
+---
+
+# 🤗 Hugging Face Models
+
+The trained models are hosted on Hugging Face and downloaded automatically during inference.
+
+## 📦 Packaging Model
+
+```text
+Repository:
+saanvimisar10/Packaging-Analysis
+
+Model:
+best_enhanced_resnet_model.pth
+```
+
+## 💊 Tablet Model
+
+```text
+Repository:
+saanvimisar10/Tablet-Analysis
+
+Model:
+pill_authenticity_classifier.pkl
+```
+
+The models are cached locally in:
+
+```text
+./models
+```
+
+---
+
+# 🔄 Fallback Mechanisms
+
+The application contains fallback mechanisms to improve robustness when the primary trained model cannot be loaded.
+
+## Tablet Analysis Fallback
+
+A lightweight fallback classifier can use extracted image characteristics such as:
+
+* Symmetry
+* Edge density
+* Contrast
+
+to produce a basic screening result.
+
+This allows the application to continue functioning when the trained tablet model is unavailable.
+
+---
+
+# 📊 Application Workflow
+
+```text
+                     USER
+                       │
+                       ▼
+              ┌─────────────────┐
+              │  Upload Images  │
+              └────────┬────────┘
+                       │
+             ┌─────────┴─────────┐
+             │                   │
+             ▼                   ▼
+      Packaging Image      Tablet Image
+             │                   │
+             ▼                   ▼
+        OCR Analysis        Preprocessing
+             │                   │
+             ▼                   ▼
+     Text Categorization   Feature Extraction
+             │                   │
+             ▼                   ▼
+      ResNet-50 Model      Authenticity Model
+             │                   │
+             ▼                   ▼
+      Packaging Result     Tablet Result
+             │                   │
+             └─────────┬─────────┘
+                       │
+                       ▼
+               Analysis Results
+                       │
+          ┌────────────┼────────────┐
+          │            │            │
+          ▼            ▼            ▼
+        OCR       Recommendations  Report
+```
+
+---
+
+# 🖥️ Application Interface
+
+The application is built using **Streamlit** and provides an interactive interface for uploading and analyzing images.
+
+## Sidebar
+
+The sidebar contains:
+
+* Application information
+* Packaging model information
+* Tablet model information
+* Analysis guidance
+
+## Main Interface
+
+The main interface contains:
+
+* Packaging image uploader
+* Physical tablet image uploader
+* Analyze button
+* OCR results
+* Packaging analysis
+* Tablet analysis
+* Recommendations
+* Downloadable report
+
+---
+
+# ▶️ How to Use
+
+## Step 1 — Upload Packaging Image
+
+Upload a clear image of the outer medicine packaging.
+
+Supported formats:
+
+```text
+.jpg
+.jpeg
+.png
+```
+
+The application displays the uploaded image before analysis.
+
+---
+
+## Step 2 — Upload Physical Tablet Image
+
+Upload a clear image of the actual tablet or pill.
+
+Supported formats:
+
+```text
+.jpg
+.jpeg
+.png
+```
+
+---
+
+## Step 3 — Start Analysis
+
+Once at least one image has been uploaded, click:
+
+```text
+🔍 ANALYZE IMAGES
+```
+
+The application analyzes whichever images have been provided.
+
+---
+
+## Step 4 — View OCR Results
+
+If a packaging image is provided, the system extracts text and attempts to categorize the information into:
+
+* Drug Name
+* Brand Name
+* Dosage
+* Components
+* Quantity
+* Other Information
+
+---
+
+## Step 5 — View Packaging Analysis
+
+The packaging module displays:
+
+```text
+📦 Packaging Visual Analysis
+
+Classification
+Confidence
+Genuine Probability
+Counterfeit Probability
+```
+
+---
+
+## Step 6 — View Tablet Analysis
+
+The tablet module displays:
+
+```text
+💊 Physical Tablet Analysis
+
+Classification
+Confidence
+Genuine Probability
+Counterfeit Probability
+```
+
+along with physical feature measurements.
+
+---
+
+## Step 7 — Download Report
+
+After analysis, the application generates a comprehensive report.
+
+Click:
+
+```text
+📥 Download Complete Analysis Report
+```
+
+to download the report as a text file.
+
+---
+
+# 📥 Analysis Report
+
+The generated report contains:
+
+```text
+COMPREHENSIVE DRUG AUTHENTICITY ANALYSIS REPORT
+
+Analysis Timestamp
+
+PACKAGING TEXT ANALYSIS
+├── Drug Name
+├── Brand Name
+├── Dosage
+├── Components
+└── Quantity
+
+PACKAGING VISUAL ANALYSIS
+├── Classification
+├── Confidence
+├── Genuine Probability
+└── Counterfeit Probability
+
+PHYSICAL TABLET ANALYSIS
+├── Classification
+├── Confidence
+├── Genuine Probability
+├── Counterfeit Probability
+└── Feature Analysis
+    ├── Symmetry
+    ├── Edge Density
+    ├── Brightness
+    ├── Contrast
+    └── Roughness
+```
+
+---
+
+# 🛠️ Tech Stack
+
+| Technology       | Purpose                            |
+| ---------------- | ---------------------------------- |
+| Python           | Core programming language          |
+| Streamlit        | Interactive web application        |
+| PyTorch          | Deep learning and model inference  |
+| Torchvision      | Image preprocessing                |
+| timm             | ResNet-50 architecture             |
+| Pillow           | Image processing                   |
+| NumPy            | Numerical computation              |
+| SciPy            | Scientific and image processing    |
+| Scikit-learn     | Machine learning and preprocessing |
+| Hugging Face Hub | Model hosting and downloading      |
+| Joblib           | Model loading                      |
+| Pickle           | Model serialization                |
+| Requests         | OCR API communication              |
+
+---
+
+# 📦 Requirements
+
+The project uses the following dependencies:
+
+```text
+streamlit==1.28.0
+torch==2.0.1
+torchvision==0.15.2
+timm==0.9.2
+Pillow==10.0.1
+numpy==1.24.3
+requests==2.31.0
+scipy==1.11.1
+scikit-learn==1.3.0
+huggingface-hub==0.19.0
+joblib==1.3.2
+```
+
+---
+
+# ⚙️ Installation
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/SaanviMisar/Counterfeit-Drug-Detection-using-Deep-Learning.git
+```
+
+```bash
+cd Counterfeit-Drug-Detection-using-Deep-Learning
+```
+
+## 2. Create a Virtual Environment
+
+### Windows
+
+```bash
+python -m venv venv
+```
+
+```bash
+venv\Scripts\activate
+```
+
+### macOS / Linux
+
+```bash
+python3 -m venv venv
+```
+
+```bash
+source venv/bin/activate
+```
+
+## 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+## 4. Run the Application
+
+```bash
+streamlit run app.py
+```
+
+The application will open in your browser.
+
+---
+
+# 📁 Project Structure
+
+```text
+Counterfeit-Drug-Detection-using-Deep-Learning/
+│
+├── app.py
+├── requirements.txt
+├── README.md
+├── logo.png
+└── .gitignore
+```
+
+The trained model files do not need to be stored directly in the repository because the application downloads them from Hugging Face when required.
+
+---
+
+# 🎯 Project Objectives
+
+The main objective of this project is to explore how multiple AI and computer-vision techniques can be integrated into a practical drug authenticity screening application.
+
+The project demonstrates the use of:
+
+* Deep Learning
+* Computer Vision
+* Image Processing
+* Feature Engineering
+* Anomaly Detection
+* OCR
+* Model Hosting
+* Model Deployment
+* Interactive Web Applications
+
+---
+
+# 🔮 Future Improvements
+
+* [ ] Larger and more diverse counterfeit-drug datasets
+* [ ] Improved tablet classification
+* [ ] Improved packaging classification
+* [ ] More robust OCR for low-quality packaging images
+* [ ] Multi-angle tablet analysis
+* [ ] Barcode verification
+* [ ] QR-code verification
+* [ ] Batch-number verification
+* [ ] Manufacturer database integration
+* [ ] Real-time camera-based analysis
+* [ ] Explainable AI visualizations
+* [ ] Improved model calibration
+* [ ] Cloud deployment
+* [ ] Automated model monitoring
+* [ ] Automated model retraining
+* [ ] Mobile-friendly interface
+
+---
+
+# ⚠️ Limitations
+
+## Image Quality
+
+Analysis can be affected by:
+
+* Poor lighting
+* Blurry images
+* Low resolution
+* Reflections
+* Occlusion
+* Unusual viewing angles
+* Complex backgrounds
+
+## OCR Limitations
+
+OCR performance can be affected by:
+
+* Small text
+* Blurry packaging
+* Distorted text
+* Unusual fonts
+* Reflections
+* Poor image quality
+
+## Model Limitations
+
+Machine-learning predictions depend on the data used during model development.
+
+The models may not generalize perfectly to:
+
+* New manufacturers
+* New packaging designs
+* Unseen medicines
+* Different tablet shapes
+* Different lighting conditions
+* Unseen counterfeit patterns
+
+---
+
+# 🔐 Security
+
+Do **not** commit API keys, passwords, access tokens, or other secrets to GitHub.
+
+API credentials should be stored using environment variables or Streamlit secrets.
+
+For Streamlit, secrets can be stored in:
+
+```text
+.streamlit/secrets.toml
+```
+
+Add the following to `.gitignore`:
+
+```text
+.streamlit/secrets.toml
+venv/
+__pycache__/
+*.pyc
+```
+
+---
+
+# ⚠️ Important Disclaimer
+
+**MedCheck-AI is an AI-based screening and educational project.**
+
+The predictions generated by this application are probabilistic and should **not** be considered definitive proof that a medicine is genuine or counterfeit.
+
+This application should not replace:
+
+* Professional pharmaceutical verification
+* Pharmacist consultation
+* Manufacturer verification
+* Laboratory testing
+* Medical advice
+
+If a medication is suspected to be counterfeit, do not consume it and seek professional verification.
+
+---
+
+---
+
+```
+```
