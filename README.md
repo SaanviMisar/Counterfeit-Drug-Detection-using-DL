@@ -11,6 +11,22 @@ The system combines **deep learning, computer vision, image processing, feature 
 ---
 🔗 **Live Demo:** https://counterfeit-drug-detection-using-dl-xvuzgtvhupyn4jr6emuvjr.streamlit.app/
 
+## 📚 Project Resources
+
+### 🚀 Application
+
+- 🔗 [Live Demo](https://counterfeit-drug-detection-using-dl-xvuzgtvhupyn4jr6emuvjr.streamlit.app/)
+
+### 🤗 Trained Models
+
+- 💊 [Tablet Analysis Model](https://huggingface.co/saanvimisar10/Tablet-Analysis)
+- 📦 [Packaging Analysis Model](https://huggingface.co/saanvimisar10/Packaging-Analysis)
+
+### 📄 Project Documentation
+
+- 📊 [Project Presentation](./MedCheck-AI_Project_Presentation.pdf)
+- 🖼️ [Research Poster](./MedCheck-AI_Research_Poster.pdf)
+- 📄 [Project Report](./MedCheck-AI_Project_Report.pdf)
 ## 📌 Project Overview
 
 Counterfeit medicines can differ from genuine medicines in several visual characteristics, including packaging quality, printed information, tablet appearance, texture, symmetry, and other physical properties.
