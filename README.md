@@ -22,6 +22,11 @@ The system combines **deep learning, computer vision, image processing, feature 
 - 💊 [Tablet Analysis Model](https://huggingface.co/saanvimisar10/Tablet-Analysis)
 - 📦 [Packaging Analysis Model](https://huggingface.co/saanvimisar10/Packaging-Analysis)
 
+### 📚 Research Publication
+
+- 📖 [Research Paper — Springer](https://link.springer.com/chapter/10.1007/978-3-032-27151-8_10)
+- 🔗 [DOI: 10.1007/978-3-032-27151-8_10](https://doi.org/10.1007/978-3-032-27151-8_10)
+
 ### 📄 Project Documentation
 
 - 📊 [Project Presentation](./MedCheck-AI_Project_Presentation.pdf)
